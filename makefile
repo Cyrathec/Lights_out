@@ -1,4 +1,4 @@
-cc = gcc
+CC = gcc
 
 ifeq ($(OS),Windows_NT)
 	LIBS = -lmingw32 -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2
