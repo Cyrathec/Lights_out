@@ -1,8 +1,5 @@
-#include "./librairies/SDL2-2.0.6/include/SDL.h"
-#include "./librairies/SDL2-2.0.6/include/SDL_image.h"
-#include "./librairies/SDL2-2.0.6/include/SDL_ttf.h"
+#include "SDL_local.h"
 
-#include <stdio.h>
 /*
 void Affichage_jeu(){
     SDL_Window* window;
