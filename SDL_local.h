@@ -4,4 +4,4 @@
 
 #include <stdio.h>
 
-void Afficage_jeu();
+void Affichage_jeu();

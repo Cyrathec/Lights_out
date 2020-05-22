@@ -69,9 +69,39 @@ void Affichage_jeu(){
 	positionRect1.y = 0;
 
 	while (!quit){
-		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, texture1, NULL, &positionRect1);
-		SDL_RenderPresent(renderer);
+
+		while (SDL_PollEvent(&e)) {
+
+			switch (e.type) {
+				case SDL_QUIT:
+					quit = 1;
+					break;
+
+				case SDL_KEYDOWN:
+					switch (e.key.keysym.sym) {
+						case SDLK_ESCAPE:
+							quit = 1;
+							break;
+					}
+					break;
+
+				case SDL_MOUSEBUTTONUP:
+					break;
+				
+				case SDL_WINDOWEVENT:
+					if(e.window.event == SDL_WINDOWEVENT_RESIZED){
+						// Change les valeurs de la largeur et la hauteur de le fenêtre
+						windoww = e.window.data1;
+						windowh = e.window.data2;
+					}
+					break;
+			}
+
+			// Mise à jour de l'affichage
+			SDL_RenderClear(renderer);
+			SDL_RenderCopy(renderer, texture1, NULL, &positionRect1);
+			SDL_RenderPresent(renderer);
+		}
 	}
 
 	// Destruction du rendeur, de la fenêtre et de la SDL
