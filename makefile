@@ -5,7 +5,7 @@ SDL_LIB = ${SLD_DIR}/lib/Win32
 SDL_INC = ${SLD_DIR}/include
 
 ifeq ($(OS),Windows_NT)
-	LIBS = -lmingw32 -lSDLmain -lSDL2_image -lSDL2_ttf -lSDL2
+	LIBS = -lmingw32 -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2
 	clr = del /s *.o
 	propre = del /s *.exe
 else
