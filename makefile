@@ -1,15 +1,15 @@
 CC = gcc
 
 SLD_DIR = ./librairies/SDL2-2.0.6
-SDL_LIB = ${SLD_DIR}/lib
+SDL_LIB = ${SLD_DIR}/lib/Win32
 SDL_INC = ${SLD_DIR}/include
 
 ifeq ($(OS),Windows_NT)
-	LIBS = -lmingw32 -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2
+	LIBS = -lmingw32 -lSDL_main -lSDL_image -lSDL_ttf -lSDL
 	clr = del /s *.o
 	propre = del /s *.exe
 else
-	LIBS = `sdl2-config --cflags --libs` -lSDL2_image -lSDL2_ttf -lSDL2
+	LIBS = `sdl2-config --cflags --libs` -lSDL_image -lSDL_ttf -lSDL
 	clr = rm -rf *.o
 	propre = find . -type f -executable -delete
 endif
