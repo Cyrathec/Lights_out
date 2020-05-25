@@ -39,7 +39,7 @@ void Affichage_jeu(){
 
 	// Initilisation du rendeur
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
 	// Instanciation des textures, surfaces et rectangles
 	SDL_Texture*** lights;
@@ -57,12 +57,12 @@ void Affichage_jeu(){
 	*/
 
 	// Initialisation des textures, surfaces
-	lights = malloc(sizeof(int) * LIGHTS_NUMBER);
-	position_lights =  malloc(sizeof(int) * LIGHTS_NUMBER);
+	lights = malloc(sizeof(SDL_Texture**) * LIGHTS_NUMBER);
+	position_lights =  malloc(sizeof(SDL_Rect*) * LIGHTS_NUMBER);
 
 	for (int i = 0; i < LIGHTS_NUMBER; i++) {
-		lights[i] = malloc(sizeof(int) * LIGHTS_NUMBER);
-		position_lights[i] =  malloc(sizeof(int) * LIGHTS_NUMBER);
+		lights[i] = malloc(sizeof(SDL_Texture*) * LIGHTS_NUMBER);
+		position_lights[i] =  malloc(sizeof(SDL_Rect) * LIGHTS_NUMBER);
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
 			image_light = IMG_Load("images/light_off.png");
 			lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light);
@@ -84,8 +84,8 @@ void Affichage_jeu(){
 	// Initialisation des rectangles
 	for (int i = 0; i < LIGHTS_NUMBER; i++) {
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
-			position_lights[i][j].x = 0 + 80 * i;
-			position_lights[i][j].y = 0 + 80 * j;
+			position_lights[i][j].x = 0 + 81 * i;
+			position_lights[i][j].y = 0 + 81 * j;
 			position_lights[i][j].w = 80;
 			position_lights[i][j].h = 80;
 		}
