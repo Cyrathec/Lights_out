@@ -43,9 +43,10 @@ void Affichage_jeu(){
 
 	// Instanciation des textures, surfaces et rectangles
 	SDL_Texture*** lights;
-	SDL_Surface*** images_lights;
+	SDL_Surface* image_light;
 	SDL_Rect** position_lights;
 
+	/* Exemples : 
 	SDL_Texture* texture1;
 	SDL_Surface* image;
 	SDL_Rect positionRect1;
@@ -53,8 +54,23 @@ void Affichage_jeu(){
 	SDL_Texture* texture2;
 	SDL_Surface* rectangle;
 	SDL_Rect positionRect2;
+	*/
 
 	// Initialisation des textures, surfaces
+	lights = malloc(sizeof(int) * LIGHTS_NUMBER);
+	position_lights =  malloc(sizeof(int) * LIGHTS_NUMBER);
+
+	for (int i = 0; i < LIGHTS_NUMBER; i++) {
+		lights[i] = malloc(sizeof(int) * LIGHTS_NUMBER);
+		position_lights[i] =  malloc(sizeof(int) * LIGHTS_NUMBER);
+		for (int j = 0; j < LIGHTS_NUMBER; j++) {
+			image_light = IMG_Load("images/light_off.png");
+			lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light);
+			SDL_FreeSurface(image_light);
+		}
+	}
+	
+	/* Exemples : 
 	image = IMG_Load("data/fond.jpg");
 	texture1 = SDL_CreateTextureFromSurface(renderer, image);
 	SDL_FreeSurface(image);
@@ -63,10 +79,17 @@ void Affichage_jeu(){
 	SDL_FillRect(rectangle, NULL, SDL_MapRGB(rectangle->format, 0, 0, 0));
 	texture2 = SDL_CreateTextureFromSurface(renderer, rectangle);
 	SDL_FreeSurface(rectangle);
+	*/
 
 	// Initialisation des rectangles
-	positionRect1.x = 0;
-	positionRect1.y = 0;
+	for (int i = 0; i < LIGHTS_NUMBER; i++) {
+		for (int j = 0; j < LIGHTS_NUMBER; j++) {
+			position_lights[i][j].x = 0 + 80 * i;
+			position_lights[i][j].y = 0 + 80 * j;
+			position_lights[i][j].w = 80;
+			position_lights[i][j].h = 80;
+		}
+	}
 
 	while (!quit){
 
@@ -99,7 +122,13 @@ void Affichage_jeu(){
 
 			// Mise à jour de l'affichage
 			SDL_RenderClear(renderer);
-			SDL_RenderCopy(renderer, texture1, NULL, &positionRect1);
+
+			for (int i = 0; i < LIGHTS_NUMBER; i++) {
+				for (int j = 0; j < LIGHTS_NUMBER; j++) {
+					SDL_RenderCopy(renderer, lights[i][j], NULL, &position_lights[i][j]);
+				}
+			}
+			
 			SDL_RenderPresent(renderer);
 		}
 	}
