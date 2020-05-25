@@ -7,4 +7,10 @@
 
 #define LIGHTS_NUMBER 5
 
+struct {
+    int h;
+    int w;
+    int hsw;
+} my_window;
+
 void Affichage_jeu();

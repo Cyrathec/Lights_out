@@ -10,8 +10,6 @@ void Affichage_jeu(){
 
 	// Initialisation des variables
     int quit = 0; // variable de test pour quitter le programme
-	int windowh; // hauteur de la fenêtre de la SDL
-	int windoww; // largeur de la fenêtre de la SDL
 
 	// Initialisation de la sdl
 	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
@@ -35,7 +33,13 @@ void Affichage_jeu(){
 	}
 
 	// Récupération de la largeur et la hauteur de le fenêtre
-	SDL_GetWindowSize(window, &windoww, &windowh);
+	SDL_GetWindowSize(window, &my_window.w, &my_window.h);
+	if(my_window.h > my_window.w) {
+		my_window.hsw = 1;
+	}
+	else {
+		my_window.hsw = 0;
+	}
 
 	// Initilisation du rendeur
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -114,8 +118,15 @@ void Affichage_jeu(){
 				case SDL_WINDOWEVENT:
 					if(e.window.event == SDL_WINDOWEVENT_RESIZED){
 						// Change les valeurs de la largeur et la hauteur de le fenêtre
-						windoww = e.window.data1;
-						windowh = e.window.data2;
+						my_window.w = e.window.data1;
+						my_window.h = e.window.data2;
+						if(my_window.h > my_window.w) {
+							my_window.hsw = 1;
+						}
+						else {
+							my_window.hsw = 0;
+						}
+						printf("w: %d\nh: %d\n", my_window.w, my_window.h);
 					}
 					break;
 			}
