@@ -21,6 +21,17 @@ void Affichage_lights_update(SDL_Rect** position_lights){
 	}
 }
 
+void Affichage_click_update(SDL_Rect** position_lights, Sint32 x, Sint32 y){
+	for (int i = 0; i < LIGHTS_NUMBER; i++) {
+		for (int j = 0; j < LIGHTS_NUMBER; j++) {
+			if(x >= position_lights[i][j].x && x <= position_lights[i][j].x + position_lights[i][j].w && y >= position_lights[i][j].y && y <= position_lights[i][j].y + position_lights[i][j].h){
+				printf("x: %d y: %d\n", x, y);
+				printf("i: %d j: %d\n", i, j);
+			}
+		}
+	}
+}
+
 void Affichage_jeu(){
 
 	// Instanciation des pointeurs de la SDL
@@ -127,6 +138,9 @@ void Affichage_jeu(){
 					break;
 
 				case SDL_MOUSEBUTTONUP:
+					if (e.button.button == SDL_BUTTON_LEFT) {
+						Affichage_click_update(position_lights, e.button.x, e.button.y);
+					}
 					break;
 				
 				case SDL_WINDOWEVENT:
