@@ -10,7 +10,7 @@
 struct {
     int h;
     int w;
-    int hsw;
+    int size;
 } my_window;
 
 void Affichage_jeu();

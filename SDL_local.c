@@ -1,5 +1,26 @@
 #include "SDL_local.h"
 
+void Affichage_lights_update(SDL_Rect** position_lights){
+	for (int i = 0; i < LIGHTS_NUMBER; i++) {
+		for (int j = 0; j < LIGHTS_NUMBER; j++) {
+			position_lights[i][j].w = (my_window.size * 10) / (12 * LIGHTS_NUMBER);
+			position_lights[i][j].h = (my_window.size * 10) / (12 * LIGHTS_NUMBER);
+			if(my_window.w > my_window.size) {
+				position_lights[i][j].x = (my_window.w - my_window.size) / 2 + (my_window.size / 12) + position_lights[i][j].w * i;
+			}
+			else {
+				position_lights[i][j].x = (my_window.size / 12) + position_lights[i][j].h * i;
+			}
+			if(my_window.h > my_window.size) {
+				position_lights[i][j].y = (my_window.h - my_window.size) / 2 + (my_window.size / 12) + position_lights[i][j].w * j;
+			}
+			else {
+				position_lights[i][j].y = (my_window.size / 12) + position_lights[i][j].h * j;
+			}
+		}
+	}
+}
+
 void Affichage_jeu(){
 
 	// Instanciation des pointeurs de la SDL
@@ -35,10 +56,10 @@ void Affichage_jeu(){
 	// Récupération de la largeur et la hauteur de le fenêtre
 	SDL_GetWindowSize(window, &my_window.w, &my_window.h);
 	if(my_window.h > my_window.w) {
-		my_window.hsw = 1;
+		my_window.size = my_window.w;
 	}
 	else {
-		my_window.hsw = 0;
+		my_window.size = my_window.h;
 	}
 
 	// Initilisation du rendeur
@@ -86,14 +107,7 @@ void Affichage_jeu(){
 	*/
 
 	// Initialisation des rectangles
-	for (int i = 0; i < LIGHTS_NUMBER; i++) {
-		for (int j = 0; j < LIGHTS_NUMBER; j++) {
-			position_lights[i][j].x = 0 + 81 * i;
-			position_lights[i][j].y = 0 + 81 * j;
-			position_lights[i][j].w = 80;
-			position_lights[i][j].h = 80;
-		}
-	}
+	Affichage_lights_update(position_lights);
 
 	while (!quit){
 
@@ -121,12 +135,12 @@ void Affichage_jeu(){
 						my_window.w = e.window.data1;
 						my_window.h = e.window.data2;
 						if(my_window.h > my_window.w) {
-							my_window.hsw = 1;
+							my_window.size =  my_window.w;
 						}
 						else {
-							my_window.hsw = 0;
+							my_window.size = my_window.h;
 						}
-						printf("w: %d\nh: %d\n", my_window.w, my_window.h);
+						Affichage_lights_update(position_lights);
 					}
 					break;
 			}
