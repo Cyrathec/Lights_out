@@ -1,6 +1,6 @@
 #include "SDL_local.h"
 
-void Affichage_lights_update(SDL_Rect** position_lights){
+void Affichage_lights_resize(SDL_Rect** position_lights){
 	for (int i = 0; i < LIGHTS_NUMBER; i++) {
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
 			position_lights[i][j].w = (my_window.size * 10) / (12 * LIGHTS_NUMBER);
@@ -21,15 +21,39 @@ void Affichage_lights_update(SDL_Rect** position_lights){
 	}
 }
 
-void Affichage_click_update(SDL_Rect** position_lights, Sint32 x, Sint32 y){
+void Affichage_click_update(int** Tab_lights, SDL_Rect** position_lights, Sint32 x, Sint32 y){
 	for (int i = 0; i < LIGHTS_NUMBER; i++) {
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
 			if(x >= position_lights[i][j].x && x <= position_lights[i][j].x + position_lights[i][j].w && y >= position_lights[i][j].y && y <= position_lights[i][j].y + position_lights[i][j].h){
-				printf("x: %d y: %d\n", x, y);
-				printf("i: %d j: %d\n", i, j);
+				Tab_lights[i][j] = !Tab_lights[i][j];
+				if(i != 0)
+					Tab_lights[i-1][j] = !Tab_lights[i-1][j];
+				if(j != 0)
+					Tab_lights[i][j-1] = !Tab_lights[i][j-1];
+				if(i != LIGHTS_NUMBER - 1)
+					Tab_lights[i+1][j] = !Tab_lights[i+1][j];
+				if(j != LIGHTS_NUMBER - 1)
+					Tab_lights[i][j+1] = !Tab_lights[i][j+1];
 			}
 		}
 	}
+}
+
+void Affichage_lights_update(SDL_Renderer* renderer, SDL_Texture*** lights, int** Tab_lights){
+	SDL_Surface* image_light_on = IMG_Load("images/light_on.png");
+	SDL_Surface* image_light_off = IMG_Load("images/light_off.png");
+
+	for (int i = 0; i < LIGHTS_NUMBER; i++) {
+		for (int j = 0; j < LIGHTS_NUMBER; j++) {
+			if(Tab_lights[i][j])
+				lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light_on);
+			else
+				lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light_off);
+		}
+	}
+
+	SDL_FreeSurface(image_light_on);
+	SDL_FreeSurface(image_light_off);
 }
 
 void Affichage_jeu(){
@@ -42,6 +66,7 @@ void Affichage_jeu(){
 
 	// Initialisation des variables
     int quit = 0; // variable de test pour quitter le programme
+	int Tab_lights[LIGHTS_NUMBER][LIGHTS_NUMBER];
 
 	// Initialisation de la sdl
 	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
@@ -79,7 +104,8 @@ void Affichage_jeu(){
 
 	// Instanciation des textures, surfaces et rectangles
 	SDL_Texture*** lights;
-	SDL_Surface* image_light;
+	SDL_Surface* image_light_on;
+	SDL_Surface* image_light_off;
 	SDL_Rect** position_lights;
 
 	/* Exemples : 
@@ -100,11 +126,11 @@ void Affichage_jeu(){
 		lights[i] = malloc(sizeof(SDL_Texture*) * LIGHTS_NUMBER);
 		position_lights[i] =  malloc(sizeof(SDL_Rect) * LIGHTS_NUMBER);
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
-			image_light = IMG_Load("images/light_off.png");
-			lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light);
-			SDL_FreeSurface(image_light);
+			Tab_lights[i][j] = 0;
 		}
 	}
+
+	Affichage_lights_update(renderer, lights, Tab_lights);
 	
 	/* Exemples : 
 	image = IMG_Load("data/fond.jpg");
@@ -118,7 +144,7 @@ void Affichage_jeu(){
 	*/
 
 	// Initialisation des rectangles
-	Affichage_lights_update(position_lights);
+	Affichage_lights_resize(position_lights);
 
 	while (!quit){
 
@@ -139,7 +165,8 @@ void Affichage_jeu(){
 
 				case SDL_MOUSEBUTTONUP:
 					if (e.button.button == SDL_BUTTON_LEFT) {
-						Affichage_click_update(position_lights, e.button.x, e.button.y);
+						Affichage_click_update(Tab_lights, position_lights, e.button.x, e.button.y);
+						Affichage_lights_update(renderer, lights, Tab_lights);
 					}
 					break;
 				
@@ -154,7 +181,7 @@ void Affichage_jeu(){
 						else {
 							my_window.size = my_window.h;
 						}
-						Affichage_lights_update(position_lights);
+						Affichage_lights_resize(position_lights);
 					}
 					break;
 			}
