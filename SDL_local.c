@@ -45,7 +45,7 @@ void Affichage_lights_update(SDL_Renderer* renderer, SDL_Texture*** lights, int*
 
 	for (int i = 0; i < LIGHTS_NUMBER; i++) {
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
-			if(Tab_lights[i][j])
+			if(Tab_lights[i][j] == 1)
 				lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light_on);
 			else
 				lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light_off);
@@ -66,7 +66,7 @@ void Affichage_jeu(){
 
 	// Initialisation des variables
     int quit = 0; // variable de test pour quitter le programme
-	int Tab_lights[LIGHTS_NUMBER][LIGHTS_NUMBER];
+	int** Tab_lights;
 
 	// Initialisation de la sdl
 	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
@@ -121,9 +121,11 @@ void Affichage_jeu(){
 	// Initialisation des textures, surfaces
 	lights = malloc(sizeof(SDL_Texture**) * LIGHTS_NUMBER);
 	position_lights =  malloc(sizeof(SDL_Rect*) * LIGHTS_NUMBER);
+	Tab_lights = malloc(sizeof(int*) * LIGHTS_NUMBER);
 
 	for (int i = 0; i < LIGHTS_NUMBER; i++) {
 		lights[i] = malloc(sizeof(SDL_Texture*) * LIGHTS_NUMBER);
+		Tab_lights[i] = malloc(sizeof(int) * LIGHTS_NUMBER);
 		position_lights[i] =  malloc(sizeof(SDL_Rect) * LIGHTS_NUMBER);
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
 			Tab_lights[i][j] = 0;
@@ -131,7 +133,7 @@ void Affichage_jeu(){
 	}
 
 	Affichage_lights_update(renderer, lights, Tab_lights);
-	
+
 	/* Exemples : 
 	image = IMG_Load("data/fond.jpg");
 	texture1 = SDL_CreateTextureFromSurface(renderer, image);
