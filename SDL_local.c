@@ -1,6 +1,6 @@
 #include "SDL_local.h"
 
-void Affichage_lights_resize(SDL_Rect** position_lights){
+void Affichage_lights_resize(SDL_Rect** position_lights, SDL_Rect* position_buttons){
 	for (int i = 0; i < LIGHTS_NUMBER; i++) {
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
 			position_lights[i][j].w = (my_window.size * 10) / (12 * LIGHTS_NUMBER);
@@ -9,14 +9,30 @@ void Affichage_lights_resize(SDL_Rect** position_lights){
 				position_lights[i][j].x = (my_window.w - my_window.size) / 2 + (my_window.size / 12) + position_lights[i][j].w * i;
 			}
 			else {
-				position_lights[i][j].x = (my_window.size / 12) + position_lights[i][j].h * i;
+				position_lights[i][j].x = (my_window.size / 12) + position_lights[i][j].w * i;
 			}
 			if(my_window.h > my_window.size) {
-				position_lights[i][j].y = (my_window.h - my_window.size) / 2 + (my_window.size / 12) + position_lights[i][j].w * j;
+				position_lights[i][j].y = (my_window.h - my_window.size) / 2 + (my_window.size / 12) + position_lights[i][j].h * j;
 			}
 			else {
 				position_lights[i][j].y = (my_window.size / 12) + position_lights[i][j].h * j;
 			}
+		}
+	}
+	for (int i = 0; i < BUTTONS_NUMBER; i++){
+		position_buttons[i].h = (my_window.size * 8) / (12 * 10);
+		position_buttons[i].w = (my_window.size * 8) / (BUTTONS_NUMBER * 10);
+		if(my_window.w > my_window.size) {
+			position_buttons[i].x = (my_window.w - my_window.size) / 2 + (my_window.size * 2 * (i + 1)) / (10 * 5) + position_buttons[i].w * i;
+		}
+		else {
+			position_buttons[i].x = (my_window.size * 2 * (i + 1)) / (10 * 5) + position_buttons[i].w * i;
+		}
+		if(my_window.h > my_window.size) {
+			position_buttons[i].y = (my_window.h - my_window.size) / 2 + my_window.size / (12 * 10);
+		}
+		else {
+			position_buttons[i].y = my_window.size / (12 * 10);
 		}
 	}
 }
@@ -56,6 +72,27 @@ void Affichage_lights_update(SDL_Renderer* renderer, SDL_Texture*** lights, int*
 	SDL_FreeSurface(image_light_off);
 }
 
+int Collision_button(SDL_Rect position_buttons[BUTTONS_NUMBER], Sint32 x, Sint32 y){
+	for (int i = 0; i < BUTTONS_NUMBER; i++) {
+		if(x >= position_buttons[i].x && x <= position_buttons[i].x + position_buttons[i].w && y >= position_buttons[i].y && y <= position_buttons[i].y + position_buttons[i].h){
+			return i;
+		}
+	}
+	return -1;
+}
+
+void Button_hoover(SDL_Renderer* renderer, SDL_Texture* button, SDL_Surface* text_button){
+	SDL_Surface* image_button_hoover = IMG_Load("images/button_hoover.png");
+	button = SDL_CreateTextureFromSurface(renderer, image_button_hoover);
+	SDL_FreeSurface(image_button_hoover);
+}
+
+void Button_unhoover(SDL_Renderer* renderer, SDL_Texture* button, SDL_Surface* text_button){
+	SDL_Surface* image_button = IMG_Load("images/button.png");
+	button = SDL_CreateTextureFromSurface(renderer, image_button);
+	SDL_FreeSurface(image_button);
+}
+
 void Affichage_jeu(){
 
 	// Instanciation des pointeurs de la SDL
@@ -67,6 +104,10 @@ void Affichage_jeu(){
 	// Initialisation des variables
     int quit = 0; // variable de test pour quitter le programme
 	int** Tab_lights;
+	int button_hoover;
+	int old_button_hoover;
+	TTF_Font* agencyFB = TTF_OpenFont("./AGENCYR.TTF", 24);
+	SDL_Color white = { 255, 255, 255 };
 
 	// Initialisation de la sdl
 	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
@@ -108,15 +149,11 @@ void Affichage_jeu(){
 	SDL_Surface* image_light_off;
 	SDL_Rect** position_lights;
 
-	/* Exemples : 
-	SDL_Texture* texture1;
-	SDL_Surface* image;
-	SDL_Rect positionRect1;
-
-	SDL_Texture* texture2;
-	SDL_Surface* rectangle;
-	SDL_Rect positionRect2;
-	*/
+	SDL_Texture* buttons[BUTTONS_NUMBER];
+	SDL_Surface* image_buttons;
+	SDL_Surface* text_buttons[BUTTONS_NUMBER];
+	SDL_Surface* blits_buttons[BUTTONS_NUMBER];
+	SDL_Rect position_buttons[BUTTONS_NUMBER];
 
 	// Initialisation des textures, surfaces
 	lights = malloc(sizeof(SDL_Texture**) * LIGHTS_NUMBER);
@@ -132,21 +169,20 @@ void Affichage_jeu(){
 		}
 	}
 
+	image_buttons = IMG_Load("images/button.png");
+	text_buttons[0] = TTF_RenderText_Blended(agencyFB, "Restart game", white);
+	text_buttons[1] = TTF_RenderText_Blended(agencyFB, "New game", white);
+	text_buttons[2] = TTF_RenderText_Blended(agencyFB, "Help", white);
+	text_buttons[3] = TTF_RenderText_Blended(agencyFB, "Resolve", white);
+	for (int i = 0; i < BUTTONS_NUMBER; i++){
+		blits_buttons[i] = (SDL_Surface*)SDL_BlitSurface(text_buttons[i], NULL, image_buttons, NULL);
+		buttons[i] = SDL_CreateTextureFromSurface(renderer, image_buttons); // crash ici
+	}
+
 	Affichage_lights_update(renderer, lights, Tab_lights);
 
-	/* Exemples : 
-	image = IMG_Load("data/fond.jpg");
-	texture1 = SDL_CreateTextureFromSurface(renderer, image);
-	SDL_FreeSurface(image);
-
-	rectangle = SDL_CreateRGBSurface(0, windoww * 1480 / 1920, windowh * 220 / 1080, 32, 0, 0, 0, 0);
-	SDL_FillRect(rectangle, NULL, SDL_MapRGB(rectangle->format, 0, 0, 0));
-	texture2 = SDL_CreateTextureFromSurface(renderer, rectangle);
-	SDL_FreeSurface(rectangle);
-	*/
-
 	// Initialisation des rectangles
-	Affichage_lights_resize(position_lights);
+	Affichage_lights_resize(position_lights, position_buttons);
 
 	while (!quit){
 
@@ -170,8 +206,22 @@ void Affichage_jeu(){
 						Affichage_click_update(Tab_lights, position_lights, e.button.x, e.button.y);
 						Affichage_lights_update(renderer, lights, Tab_lights);
 					}
+					if(e.button.button == SDL_BUTTON_RIGHT) {
+						printf("x: %d y: %d\n", e.button.x, e.button.y);
+					}
 					break;
-				
+
+				case SDL_MOUSEMOTION:
+					old_button_hoover = button_hoover;
+					button_hoover = Collision_button(position_buttons, e.motion.x, e.motion.y);
+					if(button_hoover != old_button_hoover && button_hoover != -1){
+						printf("Button %d hoover\n", button_hoover);
+						Button_hoover(renderer, buttons[button_hoover], text_buttons[button_hoover]);
+					}
+					if(old_button_hoover != -1 && old_button_hoover != button_hoover){
+						Button_unhoover(renderer, buttons[old_button_hoover], text_buttons[old_button_hoover]);
+					}
+
 				case SDL_WINDOWEVENT:
 					if(e.window.event == SDL_WINDOWEVENT_RESIZED){
 						// Change les valeurs de la largeur et la hauteur de le fenêtre
@@ -183,7 +233,7 @@ void Affichage_jeu(){
 						else {
 							my_window.size = my_window.h;
 						}
-						Affichage_lights_resize(position_lights);
+						Affichage_lights_resize(position_lights, position_buttons);
 					}
 					break;
 			}
@@ -196,6 +246,10 @@ void Affichage_jeu(){
 					SDL_RenderCopy(renderer, lights[i][j], NULL, &position_lights[i][j]);
 				}
 			}
+			for (int i = 0; i < BUTTONS_NUMBER; i++){
+				SDL_RenderCopy(renderer, buttons[i], NULL, &position_buttons[i]);
+			}
+			
 			
 			SDL_RenderPresent(renderer);
 		}
@@ -204,5 +258,6 @@ void Affichage_jeu(){
 	// Destruction du rendeur, de la fenêtre et de la SDL
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+	TTF_CloseFont(agencyFB);
 	SDL_Quit();
 }
