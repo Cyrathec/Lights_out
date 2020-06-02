@@ -83,12 +83,18 @@ int Collision_button(SDL_Rect position_buttons[BUTTONS_NUMBER], Sint32 x, Sint32
 
 void Button_hoover(SDL_Renderer* renderer, SDL_Texture* button, SDL_Surface* text_button){
 	SDL_Surface* image_button_hoover = IMG_Load("images/button_hoover.png");
+	if(SDL_BlitSurface(text_button, NULL, image_button_hoover, NULL) !=0 ){
+		printf("[-] ERROR -  Failed to blitz SDL surface (%s)\n", SDL_GetError());
+	}
 	button = SDL_CreateTextureFromSurface(renderer, image_button_hoover);
 	SDL_FreeSurface(image_button_hoover);
 }
 
 void Button_unhoover(SDL_Renderer* renderer, SDL_Texture* button, SDL_Surface* text_button){
 	SDL_Surface* image_button = IMG_Load("images/button.png");
+	if(SDL_BlitSurface(text_button, NULL, image_button, NULL) !=0 ){
+		printf("[-] ERROR -  Failed to blitz SDL surface (%s)\n", SDL_GetError());
+	}
 	button = SDL_CreateTextureFromSurface(renderer, image_button);
 	SDL_FreeSurface(image_button);
 }
@@ -104,10 +110,8 @@ void Affichage_jeu(){
 	// Initialisation des variables
     int quit = 0; // variable de test pour quitter le programme
 	int** Tab_lights;
-	int button_hoover;
-	int old_button_hoover;
-	TTF_Font* agencyFB = TTF_OpenFont("./AGENCYR.TTF", 24);
-	SDL_Color white = { 255, 255, 255 };
+	int button_hoover = -1; // variable pour le hoover des bouttons
+	int old_button_hoover = -1; // variable pour le unhoover des bouttons
 
 	// Initialisation de la sdl
 	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
@@ -120,6 +124,11 @@ void Affichage_jeu(){
 	// Initialisation des fonctionnalités liées aux images de la SDL
 	if (!IMG_Init(IMG_INIT_PNG)) {
 		printf("[-] ERROR -  Failed to initialise SDL_Image (%s)\n", SDL_GetError());
+		return;
+	}
+
+	if (TTF_Init() != 0) {
+		printf("[-] ERROR -  Failed to initialise SDL_TTF (%s)\n", SDL_GetError());
 		return;
 	}
 
@@ -142,6 +151,10 @@ void Affichage_jeu(){
 	// Initilisation du rendeur
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+	// Instanciation des variables SDL
+	TTF_Font* agencyFB = TTF_OpenFont("./AGENCYR.TTF", 24);
+	SDL_Color white = { 255, 255, 255 };
 
 	// Instanciation des textures, surfaces et rectangles
 	SDL_Texture*** lights;
@@ -169,14 +182,18 @@ void Affichage_jeu(){
 		}
 	}
 
-	image_buttons = IMG_Load("images/button.png");
 	text_buttons[0] = TTF_RenderText_Blended(agencyFB, "Restart game", white);
 	text_buttons[1] = TTF_RenderText_Blended(agencyFB, "New game", white);
 	text_buttons[2] = TTF_RenderText_Blended(agencyFB, "Help", white);
 	text_buttons[3] = TTF_RenderText_Blended(agencyFB, "Resolve", white);
+
 	for (int i = 0; i < BUTTONS_NUMBER; i++){
-		blits_buttons[i] = (SDL_Surface*)SDL_BlitSurface(text_buttons[i], NULL, image_buttons, NULL);
-		buttons[i] = SDL_CreateTextureFromSurface(renderer, image_buttons); // crash ici
+		image_buttons = IMG_Load("images/button.png");
+		if(SDL_BlitSurface(text_buttons[i], NULL, image_buttons, NULL) !=0 ){
+			printf("[-] ERROR -  Failed to blitz SDL surface (%s)\n", SDL_GetError());
+		}
+		buttons[i] = SDL_CreateTextureFromSurface(renderer, image_buttons);
+		SDL_FreeSurface(image_buttons);
 	}
 
 	Affichage_lights_update(renderer, lights, Tab_lights);
@@ -219,8 +236,10 @@ void Affichage_jeu(){
 						Button_hoover(renderer, buttons[button_hoover], text_buttons[button_hoover]);
 					}
 					if(old_button_hoover != -1 && old_button_hoover != button_hoover){
+						printf("Button %d unhoover\n", old_button_hoover);
 						Button_unhoover(renderer, buttons[old_button_hoover], text_buttons[old_button_hoover]);
 					}
+					break;
 
 				case SDL_WINDOWEVENT:
 					if(e.window.event == SDL_WINDOWEVENT_RESIZED){
