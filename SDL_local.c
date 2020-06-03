@@ -1,5 +1,19 @@
 #include "SDL_local.h"
 
+const char* name_images_buttons[BUTTONS_NUMBER] = {
+    "images/button_restart_game.png",
+    "images/button_new_game.png",
+    "images/button_help.png",
+    "images/button_resolve.png"
+};
+
+const char* name_images_buttons_c[BUTTONS_NUMBER] = {
+    "images/button_restart_game_c.png",
+    "images/button_new_game_c.png",
+    "images/button_help_c.png",
+    "images/button_resolve_c.png"
+};
+
 void Affichage_lights_resize(SDL_Rect** position_lights, SDL_Rect* position_buttons){
 	for (int i = 0; i < LIGHTS_NUMBER; i++) {
 		for (int j = 0; j < LIGHTS_NUMBER; j++) {
@@ -81,21 +95,35 @@ int Collision_button(SDL_Rect position_buttons[BUTTONS_NUMBER], Sint32 x, Sint32
 	return -1;
 }
 
-void Button_hoover(SDL_Renderer* renderer, SDL_Texture* button, SDL_Surface* text_button){
-	SDL_Surface* image_button_hoover = IMG_Load("images/button_hoover.png");
-	if(SDL_BlitSurface(text_button, NULL, image_button_hoover, NULL) !=0 ){
-		printf("[-] ERROR -  Failed to blitz SDL surface (%s)\n", SDL_GetError());
+void Button_hoover(){
+	SDL_Cursor* cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+	SDL_SetCursor(cursor);
+}
+
+void Button_unhoover(){
+	SDL_Cursor* cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+	SDL_SetCursor(cursor);
+}
+
+void Button_click(SDL_Renderer* renderer, SDL_Texture* buttons[BUTTONS_NUMBER], int index){
+	if (index < 0 || index >= BUTTONS_NUMBER){
+		return;
 	}
-	button = SDL_CreateTextureFromSurface(renderer, image_button_hoover);
+
+	SDL_Surface* image_button_hoover = IMG_Load(name_images_buttons_c[index]);
+	buttons[index] = SDL_CreateTextureFromSurface(renderer, image_button_hoover);
+
 	SDL_FreeSurface(image_button_hoover);
 }
 
-void Button_unhoover(SDL_Renderer* renderer, SDL_Texture* button, SDL_Surface* text_button){
-	SDL_Surface* image_button = IMG_Load("images/button.png");
-	if(SDL_BlitSurface(text_button, NULL, image_button, NULL) !=0 ){
-		printf("[-] ERROR -  Failed to blitz SDL surface (%s)\n", SDL_GetError());
+void Button_unclick(SDL_Renderer* renderer, SDL_Texture* buttons[BUTTONS_NUMBER], int index){
+	if (index < 0 || index >= BUTTONS_NUMBER){
+		return;
 	}
-	button = SDL_CreateTextureFromSurface(renderer, image_button);
+
+	SDL_Surface* image_button = IMG_Load(name_images_buttons[index]);
+	buttons[index] = SDL_CreateTextureFromSurface(renderer, image_button);
+
 	SDL_FreeSurface(image_button);
 }
 
@@ -110,6 +138,7 @@ void Affichage_jeu(){
 	// Initialisation des variables
     int quit = 0; // variable de test pour quitter le programme
 	int** Tab_lights;
+	int button_click; // variable to change between click and non click image for the buttons
 	int button_hoover = -1; // variable pour le hoover des bouttons
 	int old_button_hoover = -1; // variable pour le unhoover des bouttons
 
@@ -163,9 +192,7 @@ void Affichage_jeu(){
 	SDL_Rect** position_lights;
 
 	SDL_Texture* buttons[BUTTONS_NUMBER];
-	SDL_Surface* image_buttons;
-	SDL_Surface* text_buttons[BUTTONS_NUMBER];
-	SDL_Surface* blits_buttons[BUTTONS_NUMBER];
+	SDL_Surface* image_buttons[BUTTONS_NUMBER];
 	SDL_Rect position_buttons[BUTTONS_NUMBER];
 
 	// Initialisation des textures, surfaces
@@ -182,18 +209,11 @@ void Affichage_jeu(){
 		}
 	}
 
-	text_buttons[0] = TTF_RenderText_Blended(agencyFB, "Restart game", white);
-	text_buttons[1] = TTF_RenderText_Blended(agencyFB, "New game", white);
-	text_buttons[2] = TTF_RenderText_Blended(agencyFB, "Help", white);
-	text_buttons[3] = TTF_RenderText_Blended(agencyFB, "Resolve", white);
+	
 
 	for (int i = 0; i < BUTTONS_NUMBER; i++){
-		image_buttons = IMG_Load("images/button.png");
-		if(SDL_BlitSurface(text_buttons[i], NULL, image_buttons, NULL) !=0 ){
-			printf("[-] ERROR -  Failed to blitz SDL surface (%s)\n", SDL_GetError());
-		}
-		buttons[i] = SDL_CreateTextureFromSurface(renderer, image_buttons);
-		SDL_FreeSurface(image_buttons);
+		image_buttons[i] = IMG_Load(name_images_buttons[i]);
+		buttons[i] = SDL_CreateTextureFromSurface(renderer, image_buttons[i]);
 	}
 
 	Affichage_lights_update(renderer, lights, Tab_lights);
@@ -220,6 +240,10 @@ void Affichage_jeu(){
 
 				case SDL_MOUSEBUTTONUP:
 					if (e.button.button == SDL_BUTTON_LEFT) {
+						if(button_click != -1){
+							Button_unclick(renderer, buttons, button_click);
+							button_click = -1;
+						}
 						Affichage_click_update(Tab_lights, position_lights, e.button.x, e.button.y);
 						Affichage_lights_update(renderer, lights, Tab_lights);
 					}
@@ -228,16 +252,20 @@ void Affichage_jeu(){
 					}
 					break;
 
+				case SDL_MOUSEBUTTONDOWN:
+					button_click = Collision_button(position_buttons, e.motion.x, e.motion.y);
+					if(button_click != -1){
+						Button_click(renderer, buttons, button_click);
+					}
+					break;
 				case SDL_MOUSEMOTION:
 					old_button_hoover = button_hoover;
 					button_hoover = Collision_button(position_buttons, e.motion.x, e.motion.y);
-					if(button_hoover != old_button_hoover && button_hoover != -1){
-						printf("Button %d hoover\n", button_hoover);
-						Button_hoover(renderer, buttons[button_hoover], text_buttons[button_hoover]);
+					if(old_button_hoover == -1 && button_hoover != -1){
+						Button_hoover();
 					}
-					if(old_button_hoover != -1 && old_button_hoover != button_hoover){
-						printf("Button %d unhoover\n", old_button_hoover);
-						Button_unhoover(renderer, buttons[old_button_hoover], text_buttons[old_button_hoover]);
+					if(old_button_hoover != -1 && button_hoover == -1){
+						Button_unhoover();
 					}
 					break;
 
@@ -268,7 +296,6 @@ void Affichage_jeu(){
 			for (int i = 0; i < BUTTONS_NUMBER; i++){
 				SDL_RenderCopy(renderer, buttons[i], NULL, &position_buttons[i]);
 			}
-			
 			
 			SDL_RenderPresent(renderer);
 		}
