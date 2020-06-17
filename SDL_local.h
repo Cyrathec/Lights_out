@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define LIGHTS_NUMBER 5
 #define BUTTONS_NUMBER 4
 
 struct {

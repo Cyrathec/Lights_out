@@ -6,13 +6,20 @@
 int N=25; //Nombre de cases
 int L = 5; // Nombre de ligne
 int b[25], bsave[25]; //Tableau de 25, copie de toutes les valeurs de la matrice
-int Matrice[5][5]; //double tableau, 5 ligne, 5 colonnes
+int** Matrice; //double tableau, 5 ligne, 5 colonnes
 int Msave[5][5]; //idem
 
 
 int main(int argc, char* argv[]) {
-	randomize(); 
+	Matrice = malloc(sizeof(int*) * L);
+	for (int i = 0; i < L; i++){
+		Matrice[i] = malloc(sizeof(int) * L);
+	}
+	printf("ok");
+	randomize();
+	printf("ok");
 	RandomizeMatrix();
+	printf("ok");
     Affichage_jeu(L, Matrice);
     system("PAUSE");
 	return 0;

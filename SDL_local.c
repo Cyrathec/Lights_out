@@ -1,5 +1,7 @@
 #include "SDL_local.h"
 
+int num_light;
+
 const char* name_images_buttons[BUTTONS_NUMBER] = {
     "images/button_restart_game.png",
     "images/button_new_game.png",
@@ -34,11 +36,11 @@ void Unhoover(){
 	SDL_SetCursor(cursor);
 }
 
-void Window_resize(SDL_Rect** position_lights, SDL_Rect* position_buttons){
-	for (int i = 0; i < LIGHTS_NUMBER; i++) {
-		for (int j = 0; j < LIGHTS_NUMBER; j++) {
-			position_lights[i][j].w = (my_window.size * 10) / (12 * LIGHTS_NUMBER);
-			position_lights[i][j].h = (my_window.size * 10) / (12 * LIGHTS_NUMBER);
+void Window_resize(SDL_Rect** position_lights, SDL_Rect* position_buttons, int num_light){
+	for (int i = 0; i < num_light; i++) {
+		for (int j = 0; j < num_light; j++) {
+			position_lights[i][j].w = (my_window.size * 10) / (12 * num_light);
+			position_lights[i][j].h = (my_window.size * 10) / (12 * num_light);
 			if(my_window.w > my_window.size) {
 				position_lights[i][j].x = (my_window.w - my_window.size) / 2 + (my_window.size / 12) + position_lights[i][j].w * i;
 			}
@@ -71,9 +73,9 @@ void Window_resize(SDL_Rect** position_lights, SDL_Rect* position_buttons){
 	}
 }
 
-void Collision_Light(SDL_Rect** position_lights, Sint32 x, Sint32 y, int index[2]){
-	for (int i = 0; i < LIGHTS_NUMBER; i++) {
-		for (int j = 0; j < LIGHTS_NUMBER; j++) {
+void Collision_Light(SDL_Rect** position_lights, Sint32 x, Sint32 y, int index[2], int num_light){
+	for (int i = 0; i < num_light; i++) {
+		for (int j = 0; j < num_light; j++) {
 			if(x >= position_lights[i][j].x && x <= position_lights[i][j].x + position_lights[i][j].w && y >= position_lights[i][j].y && y <= position_lights[i][j].y + position_lights[i][j].h){
 				index[0] = i;
 				index[1] = j;
@@ -86,11 +88,11 @@ void Collision_Light(SDL_Rect** position_lights, Sint32 x, Sint32 y, int index[2
 	return;
 }
 
-void Light_click(SDL_Renderer* renderer, SDL_Texture*** lights, int** tab_lights, int index_i, int index_j){
-	if (index_i < 0 || index_i >= LIGHTS_NUMBER){
+void Light_click(SDL_Renderer* renderer, SDL_Texture*** lights, int** tab_lights, int index_i, int index_j, int num_light){
+	if (index_i < 0 || index_i >= num_light){
 		return;
 	}
-	if (index_j < 0 || index_j >= LIGHTS_NUMBER){
+	if (index_j < 0 || index_j >= num_light){
 		return;
 	}
 
@@ -100,11 +102,11 @@ void Light_click(SDL_Renderer* renderer, SDL_Texture*** lights, int** tab_lights
 	SDL_FreeSurface(image_light);
 }
 
-void Light_unclick(SDL_Renderer* renderer, SDL_Texture*** lights, int** tab_lights, int index_i, int index_j){
-	if (index_i < 0 || index_i >= LIGHTS_NUMBER){
+void Light_unclick(SDL_Renderer* renderer, SDL_Texture*** lights, int** tab_lights, int index_i, int index_j, int num_light){
+	if (index_i < 0 || index_i >= num_light){
 		return;
 	}
-	if (index_j < 0 || index_j >= LIGHTS_NUMBER){
+	if (index_j < 0 || index_j >= num_light){
 		return;
 	}
 
@@ -124,13 +126,13 @@ void Light_unclick(SDL_Renderer* renderer, SDL_Texture*** lights, int** tab_ligh
 		lights[index_i][index_j-1] = SDL_CreateTextureFromSurface(renderer, image_light);
 	}
 
-	if(index_i != LIGHTS_NUMBER - 1){
+	if(index_i != num_light - 1){
 		tab_lights[index_i+1][index_j] = !tab_lights[index_i+1][index_j];
 		SDL_Surface* image_light = IMG_Load(name_images_lights[tab_lights[index_i+1][index_j]]);
 		lights[index_i+1][index_j] = SDL_CreateTextureFromSurface(renderer, image_light);
 	}
 
-	if(index_j != LIGHTS_NUMBER - 1){
+	if(index_j != num_light - 1){
 		tab_lights[index_i][index_j+1] = !tab_lights[index_i][index_j+1];
 		SDL_Surface* image_light = IMG_Load(name_images_lights[tab_lights[index_i][index_j+1]]);
 		lights[index_i][index_j+1] = SDL_CreateTextureFromSurface(renderer, image_light);
@@ -189,7 +191,7 @@ void Button_unclick(SDL_Renderer* renderer, SDL_Texture* buttons[BUTTONS_NUMBER]
 	SDL_FreeSurface(image_button);
 }
 
-void Affichage_jeu(int weigth, int **tab_lights_init){
+void Affichage_jeu(int weight, int **tab_lights_init){
 
 	// Instanciation des pointeurs de la SDL
     SDL_Window* window;
@@ -258,36 +260,27 @@ void Affichage_jeu(int weigth, int **tab_lights_init){
 	SDL_Surface* image_buttons[BUTTONS_NUMBER];
 	SDL_Rect position_buttons[BUTTONS_NUMBER];
 
-	// Initialisation du tableau
-	for (int i = 0; i < weigth; i++){
-		for (int j = 0; i < weigth; j++){
-			tab_lights[i][j] = tab_lights_init[i][j];
-		}
-	}
-
 	// Initialisation des textures, surfaces
-	lights = malloc(sizeof(SDL_Texture**) * LIGHTS_NUMBER);
-	position_lights =  malloc(sizeof(SDL_Rect*) * LIGHTS_NUMBER);
-	tab_lights = malloc(sizeof(int*) * LIGHTS_NUMBER);
+	num_light = weight;
+	lights = malloc(sizeof(SDL_Texture**) * num_light);
+	position_lights =  malloc(sizeof(SDL_Rect*) * num_light);
+	tab_lights = malloc(sizeof(int*) * num_light);
 
-	for (int i = 0; i < LIGHTS_NUMBER; i++) {
-		lights[i] = malloc(sizeof(SDL_Texture*) * LIGHTS_NUMBER);
-		tab_lights[i] = malloc(sizeof(int) * LIGHTS_NUMBER);
-		position_lights[i] =  malloc(sizeof(SDL_Rect) * LIGHTS_NUMBER);
-		for (int j = 0; j < LIGHTS_NUMBER; j++) {
-			tab_lights[i][j] = 0;
+	for (int i = 0; i < num_light; i++) {
+		lights[i] = malloc(sizeof(SDL_Texture*) * num_light);
+		tab_lights[i] = malloc(sizeof(int) * num_light);
+		position_lights[i] =  malloc(sizeof(SDL_Rect) * num_light);
+		for (int j = 0; j < num_light; j++) {
+			printf("i: %d j: %d\n", i, j);
+			printf("%d\n", tab_lights_init[i][j]);
+			tab_lights[i][j] = tab_lights_init[i][j];
 			SDL_Surface* image_light = IMG_Load(name_images_lights[tab_lights[i][j]]);
 			lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light);
 		}
 	}
 
-	for (int i = 0; i < BUTTONS_NUMBER; i++){
-		image_buttons[i] = IMG_Load(name_images_buttons[i]);
-		buttons[i] = SDL_CreateTextureFromSurface(renderer, image_buttons[i]);
-	}
-
 	// Initialisation des rectangles
-	Window_resize(position_lights, position_buttons);
+	Window_resize(position_lights, position_buttons, num_light);
 
 	while (!quit){
 
@@ -313,7 +306,7 @@ void Affichage_jeu(int weigth, int **tab_lights_init){
 							button_click = -1;
 						}
 						if(light_click[0] != -1 && light_click[1] != -1){
-							Light_unclick(renderer, lights, tab_lights, light_click[0], light_click[1]);
+							Light_unclick(renderer, lights, tab_lights, light_click[0], light_click[1], num_light);
 							light_click[0] = -1;
 							light_click[1] = -1;
 						}
@@ -325,19 +318,19 @@ void Affichage_jeu(int weigth, int **tab_lights_init){
 
 				case SDL_MOUSEBUTTONDOWN:
 					button_click = Collision_button(position_buttons, e.motion.x, e.motion.y);
-					Collision_Light(position_lights, e.button.x, e.button.y, light_click);
+					Collision_Light(position_lights, e.button.x, e.button.y, light_click, num_light);
 					if(button_click != -1){
 						Button_click(renderer, buttons, button_click);
 					}
 					if(light_click[0] != -1 && light_click[1] != -1){
-						Light_click(renderer, lights, tab_lights, light_click[0], light_click[1]);
+						Light_click(renderer, lights, tab_lights, light_click[0], light_click[1], num_light);
 					}
 					break;
 				case SDL_MOUSEMOTION:
 					old_hoover = hoover;
 					int col_but = Collision_button(position_buttons, e.motion.x, e.motion.y);
 					int col_ligth[2];
-					Collision_Light(position_lights, e.motion.x, e.motion.y, col_ligth);
+					Collision_Light(position_lights, e.motion.x, e.motion.y, col_ligth, num_light);
 					if(col_but != -1 || (col_ligth[0] != -1 && col_ligth[1] != -1))
 						hoover = 1;
 					else
@@ -361,7 +354,7 @@ void Affichage_jeu(int weigth, int **tab_lights_init){
 						else {
 							my_window.size = my_window.h;
 						}
-						Window_resize(position_lights, position_buttons);
+						Window_resize(position_lights, position_buttons, num_light);
 					}
 					break;
 			}
@@ -369,8 +362,8 @@ void Affichage_jeu(int weigth, int **tab_lights_init){
 			// Mise à jour de l'affichage
 			SDL_RenderClear(renderer);
 
-			for (int i = 0; i < LIGHTS_NUMBER; i++) {
-				for (int j = 0; j < LIGHTS_NUMBER; j++) {
+			for (int i = 0; i < num_light; i++) {
+				for (int j = 0; j < num_light; j++) {
 					SDL_RenderCopy(renderer, lights[i][j], NULL, &position_lights[i][j]);
 				}
 			}
