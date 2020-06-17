@@ -164,13 +164,32 @@ void Button_unclick(SDL_Renderer* renderer, SDL_Texture* buttons[BUTTONS_NUMBER]
 		return;
 	}
 
+	printf("%d\n", index);
+
+	switch (index){
+	case 0:
+		/* code */
+		break;
+	case 1:
+		/* code */
+		break;
+	case 2:
+		/* code */
+		break;
+	case 3:
+		/* code */
+		break;
+	default:
+		break;
+	}
+
 	SDL_Surface* image_button = IMG_Load(name_images_buttons[index]);
 	buttons[index] = SDL_CreateTextureFromSurface(renderer, image_button);
 
 	SDL_FreeSurface(image_button);
 }
 
-void Affichage_jeu(){
+void Affichage_jeu(int weigth, int **tab_lights_init){
 
 	// Instanciation des pointeurs de la SDL
     SDL_Window* window;
@@ -238,6 +257,13 @@ void Affichage_jeu(){
 	SDL_Texture* buttons[BUTTONS_NUMBER];
 	SDL_Surface* image_buttons[BUTTONS_NUMBER];
 	SDL_Rect position_buttons[BUTTONS_NUMBER];
+
+	// Initialisation du tableau
+	for (int i = 0; i < weigth; i++){
+		for (int j = 0; i < weigth; j++){
+			tab_lights[i][j] = tab_lights_init[i][j];
+		}
+	}
 
 	// Initialisation des textures, surfaces
 	lights = malloc(sizeof(SDL_Texture**) * LIGHTS_NUMBER);

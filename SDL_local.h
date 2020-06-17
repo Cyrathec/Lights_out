@@ -14,4 +14,4 @@ struct {
     int size;
 } my_window;
 
-void Affichage_jeu();
+void Affichage_jeu(int weigth, int **tab_lights);

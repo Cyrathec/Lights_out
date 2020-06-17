@@ -1,4 +1,6 @@
 #include "lightsout.h"
+#include "SDL_local.h"
+#include <math.h>
 
 //Variables globales
 int N=25; //Nombre de cases
@@ -11,7 +13,7 @@ int Msave[5][5]; //idem
 int main(int argc, char* argv[]) {
 	randomize(); 
 	RandomizeMatrix();
-    Affichage_jeu();
+    Affichage_jeu(L, Matrice);
     system("PAUSE");
 	return 0;
 }
@@ -104,7 +106,11 @@ void Unique(void) {
 				if (Matrice[line][Line] != 0) {
 					for (i = Line; i >= 0; i--)
 						aux[i] = Matrice[Line][i];
-					for (i = Line; i >= 0; i--)						Matrice[Line][i] = Matrice[line][i];					for (i = Line; i >= 0; i--)						Matrice[line][i] = aux[i];					auxb = b[Line];
+					for (i = Line; i >= 0; i--)
+						Matrice[Line][i] = Matrice[line][i];
+					for (i = Line; i >= 0; i--)
+						Matrice[line][i] = aux[i];
+					auxb = b[Line];
 					b[Line] = b[line];
 					b[line] = auxb;
 					break;
@@ -144,9 +150,16 @@ void Multiple(int LL, int nombre) {
 		}
 
 		//calcul des solutions
-		for (line = 0; line < LL; line++) {			cumul = 0;			for (j = 0; j < nombre; j++)				cumul += x[N - 1 - j] * Matrice[line][N - 1 - j];			b[line] = (b[line] + cumul) % 2;		}		for (j = 0; j < nombre; j++) {
+		for (line = 0; line < LL; line++) {
+			cumul = 0;
+			for (j = 0; j < nombre; j++)
+				cumul += x[N - 1 - j] * Matrice[line][N - 1 - j];
+			b[line] = (b[line] + cumul) % 2;
+		}
+		for (j = 0; j < nombre; j++) {
 			for (Line = LL - 1; Line > 0; Line--) {
-				if (Matrice[Line][Line] == 0)					for (line = Line - 1; line >= 0; line--) {
+				if (Matrice[Line][Line] == 0)
+					for (line = Line - 1; line >= 0; line--) {
 						if (Matrice[line][Line] != 0) {
 							for (i = Line; i >= 0; i--)
 								aux[i] = Matrice[Line][i];
@@ -164,12 +177,16 @@ void Multiple(int LL, int nombre) {
 				for (line = Line - 1; line >= 0; line--) {
 					if (Matrice[line][Line] != 0) {
 						for (column = Line; column >= 0; column--)
-						Matrice[line][column] = (Matrice[line][column] + Matrice[Line][column]) % 2;						b[line] = (b[line] + b[Line]) % 2;
+						Matrice[line][column] = (Matrice[line][column] + Matrice[Line][column]) % 2;
+						b[line] = (b[line] + b[Line]) % 2;
 					}
 				}
 			}
 
-			for (i = 0; i < N - nombre; i++) 				printf(" x%d=%d", i, b[i]);			for (j = 0; j <	nombre; j++)				printf(" x%d=%d", N - nombre + j, x[N - nombre + j]);
+			for (i = 0; i < N - nombre; i++) 
+				printf(" x%d=%d", i, b[i]);
+			for (j = 0; j <	nombre; j++)
+				printf(" x%d=%d", N - nombre + j, x[N - nombre + j]);
 		}
 	}
 }
