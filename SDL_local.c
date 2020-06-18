@@ -194,7 +194,7 @@ void Button_unclick(SDL_Renderer* renderer, SDL_Texture* buttons[BUTTONS_NUMBER]
 	SDL_FreeSurface(image_button);
 }
 
-void Affichage_jeu(int** tab_lights_init, int weight){
+void Affichage_jeu(int** tab_lights, int weight){
 
 	// Instanciation des pointeurs de la SDL
     SDL_Window* window;
@@ -204,7 +204,7 @@ void Affichage_jeu(int** tab_lights_init, int weight){
 
 	// Initialisation des variables
     int quit = 0; // variable de test pour quitter le programme
-	int** tab_lights;
+	int** tab_lights_init;
 	int light_click[2]; // variable to change between click and non click image for lights
 	int button_click; // variable to change between click and non click image for the buttons
 	int hoover = 0; // variable for the hoover
@@ -267,16 +267,14 @@ void Affichage_jeu(int** tab_lights_init, int weight){
 	num_light = weight;
 	lights = malloc(sizeof(SDL_Texture**) * num_light);
 	position_lights =  malloc(sizeof(SDL_Rect*) * num_light);
-	tab_lights = malloc(sizeof(int*) * num_light);
+	tab_lights_init = malloc(sizeof(int*) * num_light);
 
 	for (int i = 0; i < num_light; i++) {
 		lights[i] = malloc(sizeof(SDL_Texture*) * num_light);
-		tab_lights[i] = malloc(sizeof(int) * num_light);
+		tab_lights_init[i] = malloc(sizeof(int) * num_light);
 		position_lights[i] =  malloc(sizeof(SDL_Rect) * num_light);
 		for (int j = 0; j < num_light; j++) {
-			printf("i: %d j: %d\n", i, j);
-			printf("%d\n", tab_lights_init[i][j]);
-			tab_lights[i][j] = tab_lights_init[i][j];
+			tab_lights_init[i][j] = tab_lights[i][j];
 			SDL_Surface* image_light = IMG_Load(name_images_lights[tab_lights[i][j]]);
 			lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light);
 		}
@@ -370,8 +368,11 @@ void Affichage_jeu(int** tab_lights_init, int weight){
 					SDL_RenderCopy(renderer, lights[i][j], NULL, &position_lights[i][j]);
 				}
 			}
+			printf("%p\n", buttons);
 			for (int i = 0; i < BUTTONS_NUMBER; i++){
+				printf("%p\n", buttons[i]);
 				SDL_RenderCopy(renderer, buttons[i], NULL, &position_buttons[i]);
+				printf("err : %s\n", SDL_GetError());
 			}
 			
 			SDL_RenderPresent(renderer);

@@ -1,6 +1,8 @@
 #include "lightsout.h"
 
 #include <time.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 // Initialisation de toutes les cases de la matrice
 void Randomize(int* b, int nb_cases) {
@@ -13,7 +15,15 @@ void Randomize(int* b, int nb_cases) {
 // Correspondance cases matrice avec valeur random entre 0 et 1
 void RandomizeMatrix(int** matrice, int weight, int nb_cases) {
 	srand(time(NULL));
+	for (int i = 0; i < weight; i++) {
+		for (int j = 0; j < weight; j++) {
+			matrice[i][j] = rand() % 2;
+		}
+	}
+	
+	/*
 	for (int i = 0; i < nb_cases; i++) {
+		printf("i: %d\n", i);
 		matrice[i][i] = rand() % 2;
 		if (i % weight != 0)
 			matrice[i][i - 1] = rand() % 2;
@@ -24,6 +34,7 @@ void RandomizeMatrix(int** matrice, int weight, int nb_cases) {
 		if(i < nb_cases - weight)
 			matrice[i][i + weight] = rand() % 2;
 	}
+	*/
 }
 
 //=====================================================================================================================//
@@ -107,7 +118,7 @@ void Unique(int** matrice, int* b, int nb_cases) {
 void Multiple(int** matrice, int** msave, int* b, int* bsave, int nb_cases, int LL, int nombre) {
 	int sln, i, q, j, line, column, Line, cumul, n, auxb;
 	int x[25], aux[25];
-	sln = pow(2, nombre);
+	sln = nombre * nombre;
 	for (n = 0; n < sln; n++) {
 		//Sauvegarde de la matrice g�n�r�e et du tableau initial car il faut les r�g�n�rer a chaque calcul de solution
 		for(i = 0; i < nombre; i++)

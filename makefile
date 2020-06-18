@@ -14,7 +14,7 @@ else
 	propre = find . -type f -executable -delete
 endif
 
-Lights_out: main.o SDL_local.o
+Lights_out: main.o SDL_local.o lightsout.o
 	${CC} $^ -o $@ ${LIBS}
 
 %.o: %.c
