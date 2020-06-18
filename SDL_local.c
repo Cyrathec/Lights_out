@@ -1,4 +1,5 @@
 #include "SDL_local.h"
+#include "lightsout.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -169,25 +170,6 @@ void Button_unclick(SDL_Renderer* renderer, SDL_Texture* buttons[BUTTONS_NUMBER]
 		return;
 	}
 
-	printf("%d\n", index);
-
-	switch (index){
-	case 0:
-		/* code */
-		break;
-	case 1:
-		/* code */
-		break;
-	case 2:
-		/* code */
-		break;
-	case 3:
-		/* code */
-		break;
-	default:
-		break;
-	}
-
 	SDL_Surface* image_button = IMG_Load(name_images_buttons[index]);
 	buttons[index] = SDL_CreateTextureFromSurface(renderer, image_button);
 
@@ -280,6 +262,11 @@ void Affichage_jeu(int** tab_lights, int weight){
 		}
 	}
 
+	for (int i = 0; i < BUTTONS_NUMBER; i++){
+		image_buttons[i] = IMG_Load(name_images_buttons[i]);
+		buttons[i] = SDL_CreateTextureFromSurface(renderer, image_buttons[i]);
+	}
+
 	// Initialisation des rectangles
 	Window_resize(position_lights, position_buttons, num_light);
 
@@ -304,6 +291,33 @@ void Affichage_jeu(int** tab_lights, int weight){
 					if (e.button.button == SDL_BUTTON_LEFT) {
 						if(button_click != -1){
 							Button_unclick(renderer, buttons, button_click);
+							switch (button_click) {
+								case 0:
+									for (int i = 0; i < weight; i++) {
+										for (int j = 0; j < weight; j++) {
+											tab_lights[i][j] = tab_lights_init[i][j];
+											SDL_Surface* image_light = IMG_Load(name_images_lights[tab_lights[i][j]]);
+											lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light);
+										}
+									}
+									break;
+								case 1:
+									RandomizeMatrix(tab_lights_init, weight, (weight * weight));
+									for (int i = 0; i < weight; i++) {
+										for (int j = 0; j < weight; j++) {
+											tab_lights[i][j] = tab_lights_init[i][j];
+											SDL_Surface* image_light = IMG_Load(name_images_lights[tab_lights[i][j]]);
+											lights[i][j] = SDL_CreateTextureFromSurface(renderer, image_light);
+										}
+									}
+									break;
+								case 2:
+									break;
+								case 3:
+									break;
+								default:
+									break;
+							}
 							button_click = -1;
 						}
 						if(light_click[0] != -1 && light_click[1] != -1){
@@ -368,11 +382,8 @@ void Affichage_jeu(int** tab_lights, int weight){
 					SDL_RenderCopy(renderer, lights[i][j], NULL, &position_lights[i][j]);
 				}
 			}
-			printf("%p\n", buttons);
 			for (int i = 0; i < BUTTONS_NUMBER; i++){
-				printf("%p\n", buttons[i]);
 				SDL_RenderCopy(renderer, buttons[i], NULL, &position_buttons[i]);
-				printf("err : %s\n", SDL_GetError());
 			}
 			
 			SDL_RenderPresent(renderer);
