@@ -1,5 +1,8 @@
 #include "SDL_local.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 int num_light;
 
 const char* name_images_buttons[BUTTONS_NUMBER] = {
@@ -191,7 +194,7 @@ void Button_unclick(SDL_Renderer* renderer, SDL_Texture* buttons[BUTTONS_NUMBER]
 	SDL_FreeSurface(image_button);
 }
 
-void Affichage_jeu(int weight, int **tab_lights_init){
+void Affichage_jeu(int** tab_lights_init, int weight){
 
 	// Instanciation des pointeurs de la SDL
     SDL_Window* window;
